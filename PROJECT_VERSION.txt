@@ -1,0 +1,4 @@
+Lucky Dangle Browser Android
+Version: 1.0.3
+Build compatibility: AGP 9.1.1, Gradle 9.3.1, Kotlin Gradle Plugin 2.4.20, compileSdk 37, JDK 17
+Changes: Kotlin compiler compatibility with GeckoView 159; replace unsupported hypot calls with sqrt-based distance calculation.

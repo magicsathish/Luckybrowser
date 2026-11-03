@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="ta">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Real Lucky Dangle Pro Studio</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      background: radial-gradient(circle at center, #f8fafc, #cbd5e1);
+      height: 100vh;
+      overflow: hidden;
+      touch-action: none;
+      user-select: none;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+    canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 1;
+    }
+
+    /* Floating Toggle Button */
+    .menu-trigger {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      width: 48px;
+      height: 48px;
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-radius: 50%;
+      color: #f8fafc;
+      font-size: 22px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+      z-index: 50;
+      transition: transform 0.2s, background-color 0.2s;
+    }
+    .menu-trigger:active {
+      transform: scale(0.92);
+    }
+
+    /* Glassmorphism Dark/Grey Sidebar */
+    .sidebar {
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 310px;
+      height: 100vh;
+      background: rgba(15, 23, 42, 0.94);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-left: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: -10px 0 35px rgba(0, 0, 0, 0.5);
+      z-index: 40;
+      transform: translateX(100%);
+      transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      flex-direction: column;
+      padding: 24px 20px;
+      color: #e2e8f0;
+      overflow-y: auto;
+      gap: 18px;
+    }
+    .sidebar.open {
+      transform: translateX(0);
+    }
+
+    .sidebar-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #334155;
+    }
+    .sidebar-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: #f8fafc;
+    }
+    .close-btn {
+      background: none;
+      border: none;
+      color: #94a3b8;
+      font-size: 24px;
+      cursor: pointer;
+      padding: 0 4px;
+    }
+
+    .section-title {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #94a3b8;
+      margin-bottom: 8px;
+    }
+
+    /* Language Switcher Tabs */
+    .lang-tabs {
+      display: flex;
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 12px;
+      padding: 3px;
+      gap: 2px;
+    }
+    .lang-tab {
+      flex: 1;
+      padding: 8px 4px;
+      background: transparent;
+      border: none;
+      color: #94a3b8;
+      font-size: 11px;
+      font-weight: 600;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: center;
+    }
+    .lang-tab.active {
+      background: #334155;
+      color: #ffd700;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    }
+
+    /* Charm Selector Grid */
+    .charms-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+    .charms-grid button {
+      background: #1e293b;
+      border: 1px solid #334155;
+      padding: 10px 0;
+      font-size: 22px;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .charms-grid button:active {
+      transform: scale(0.9);
+      background: #334155;
+    }
+
+    /* Sliders */
+    .slider-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .slider-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+    }
+    input[type="range"] {
+      width: 100%;
+      accent-color: #f59e0b;
+      cursor: pointer;
+    }
+
+    /* Sensor Button */
+    .sensor-btn {
+      background: #1e293b;
+      color: #f8fafc;
+      border: 1px solid #334155;
+      padding: 11px 14px;
+      border-radius: 12px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+    .sensor-btn:active {
+      background: #334155;
+    }
+    .sensor-active {
+      background: #15803d !important;
+      border-color: #22c55e !important;
+    }
+
+    .credits {
+      margin-top: auto;
+      text-align: center;
+      color: #64748b;
+      font-size: 12px;
+      padding-top: 8px;
+    }
+    .credits span {
+      color: #f59e0b;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="menu-trigger" onclick="toggleSidebar()" aria-label="Settings">⚙️</div>
+
+  <div id="sidebar" class="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-title" id="txt-settings">அமைப்புகள்</div>
+      <button class="close-btn" onclick="toggleSidebar()">✕</button>
+    </div>
+
+    <!-- 3 Language Options (தமிழ், English, Auto/Browser) -->
+    <div>
+      <div class="section-title" id="txt-lang-title">மொழி (Language)</div>
+      <div class="lang-tabs">
+        <button class="lang-tab" id="tab-ta" onclick="changeLanguageMode('ta')">தமிழ்</button>
+        <button class="lang-tab" id="tab-en" onclick="changeLanguageMode('en')">English</button>
+        <button class="lang-tab" id="tab-auto" onclick="changeLanguageMode('auto')">🌐 Auto (Browser)</button>
+      </div>
+    </div>
+
+    <!-- Sensor Toggle -->
+    <div>
+      <button id="sensor-btn" class="sensor-btn" style="width: 100%;" onclick="toggleSensor()">
+        📱 <span id="sensor-txt">சென்சார் ஆன் செய்</span>
+      </button>
+    </div>
+
+    <!-- Dangle Type -->
+    <div>
+      <div class="section-title" id="txt-charms">டாங்கிள் தேர்வுகள்</div>
+      <div class="charms-grid">
+        <button onclick="setTheme('traditional')">🍋</button>
+        <button onclick="setTheme('drishti')">👹</button>
+        <button onclick="setTheme('nazar')">🧿</button>
+        <button onclick="setTheme('bell')">🔔</button>
+      </div>
+    </div>
+
+    <!-- Position Controls -->
+    <div>
+      <div class="section-title" id="txt-position">இட அமைப்பு (Position)</div>
+      <div class="slider-group">
+        <div class="slider-header">
+          <span id="txt-posx">கிடைமட்ட நிலை (X)</span>
+        </div>
+        <input type="range" id="posX-slider" min="15" max="85" value="50" oninput="updateHangPoint()">
+      </div>
+    </div>
+
+    <!-- Size Controls -->
+    <div>
+      <div class="section-title" id="txt-size">அளவு (Size & Length)</div>
+      <div class="slider-group" style="margin-bottom: 12px;">
+        <div class="slider-header">
+          <span id="txt-scale">பொருளின் அளவு (Scale)</span>
+        </div>
+        <input type="range" id="scale-slider" min="0.6" max="1.8" step="0.05" value="1" oninput="updateScales()">
+      </div>
+      <div class="slider-group">
+        <div class="slider-header">
+          <span id="txt-length">கயிறு நீளம் (Rope Length)</span>
+        </div>
+        <input type="range" id="len-slider" min="12" max="32" value="22" oninput="updateScales()">
+      </div>
+    </div>
+
+    <div class="credits">created by <span>Magic Sathish</span> ✨</div>
+  </div>
+
+  <canvas id="canvas"></canvas>
+
+  <script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+
+    // Language & Internationalization
+    let langMode = 'auto'; // 'ta', 'en', 'auto'
+    const i18n = {
+      ta: {
+        settings: 'அமைப்புகள் (Settings)',
+        langTitle: 'மொழி (Language)',
+        sensor: 'சென்சார் ஆன் செய்',
+        sensorActive: '✓ சென்சார் ஆக்டிவ்',
+        charms: 'டாங்கிள் தேர்வுகள்',
+        position: 'இட அமைப்பு (Position)',
+        posx: 'கிடைமட்ட நிலை (X)',
+        size: 'அளவு (Size & Length)',
+        scale: 'பொருளின் அளவு (Scale)',
+        ropeLen: 'கயிறு நீளம் (Rope Length)'
+      },
+      en: {
+        settings: 'Settings Studio',
+        langTitle: 'Language Preference',
+        sensor: 'Enable Motion Sensor',
+        sensorActive: '✓ Sensor Active',
+        charms: 'Dangle Style',
+        position: 'Positioning',
+        posx: 'Horizontal Pos (X)',
+        size: 'Size & Length',
+        scale: 'Dangle Scale',
+        ropeLen: 'Rope Length'
+      }
+    };
+
+    function resolveLanguage() {
+      if (langMode === 'auto') {
+        const browserLang = (navigator.language || navigator.userLanguage || 'ta').toLowerCase();
+        return browserLang.startsWith('ta') ? 'ta' : 'en';
+      }
+      return langMode;
+    }
+
+    function applyLanguageUI() {
+      const activeLang = resolveLanguage();
+      const d = i18n[activeLang];
+
+      document.getElementById('txt-settings').textContent = d.settings;
+      document.getElementById('txt-lang-title').textContent = d.langTitle;
+      document.getElementById('txt-charms').textContent = d.charms;
+      document.getElementById('txt-position').textContent = d.position;
+      document.getElementById('txt-posx').textContent = d.posx;
+      document.getElementById('txt-size').textContent = d.size;
+      document.getElementById('txt-scale').textContent = d.scale;
+      document.getElementById('txt-length').textContent = d.ropeLen;
+      document.getElementById('sensor-txt').textContent = isSensorEnabled ? d.sensorActive : d.sensor;
+
+      document.getElementById('tab-ta').classList.toggle('active', langMode === 'ta');
+      document.getElementById('tab-en').classList.toggle('active', langMode === 'en');
+      document.getElementById('tab-auto').classList.toggle('active', langMode === 'auto');
+    }
+
+    function changeLanguageMode(mode) {
+      langMode = mode;
+      applyLanguageUI();
+    }
+
+    function toggleSidebar() {
+      document.getElementById('sidebar').classList.toggle('open');
+    }
+
+    function resize() {
+      canvas.width = window.innerWidth * window.devicePixelRatio;
+      canvas.height = window.innerHeight * window.devicePixelRatio;
+      ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    // Rope simulation variables
+    const NUM_POINTS = 9;
+    let SEGMENT_LEN = 22;
+    let charmScale = 1;
+    let hangPercentX = 0.5;
+
+    let points = [];
+    let currentTheme = 'traditional';
+    let gravityX = 0;
+    let gravityY = 0.65;
+    let lastAccX = 0;
+    let lastAccY = 0;
+    let isSensorEnabled = false;
+
+    function initRope() {
+      points = [];
+      const originX = window.innerWidth * hangPercentX;
+      for (let i = 0; i < NUM_POINTS; i++) {
+        points.push({
+          x: originX,
+          y: i * SEGMENT_LEN + 10,
+          oldX: originX,
+          oldY: i * SEGMENT_LEN + 10,
+          pinned: (i === 0)
+        });
+      }
+    }
+    initRope();
+
+    function updateHangPoint() {
+      hangPercentX = document.getElementById('posX-slider').value / 100;
+      points[0].x = window.innerWidth * hangPercentX;
+    }
+
+    function updateScales() {
+      charmScale = parseFloat(document.getElementById('scale-slider').value);
+      SEGMENT_LEN = parseFloat(document.getElementById('len-slider').value);
+    }
+
+    function setTheme(theme) {
+      currentTheme = theme;
+      points[points.length - 1].oldX -= 30;
+      toggleSidebar();
+    }
+
+    // Motion Sensor
+    function toggleSensor() {
+      if (isSensorEnabled) return;
+
+      if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+        DeviceOrientationEvent.requestPermission().then(res => {
+          if (res === 'granted') startSensorListeners();
+        }).catch(console.error);
+      } else {
+        startSensorListeners();
+      }
+    }
+
+    function startSensorListeners() {
+      isSensorEnabled = true;
+      const btn = document.getElementById('sensor-btn');
+      btn.classList.add('sensor-active');
+      applyLanguageUI();
+
+      window.addEventListener('deviceorientation', (e) => {
+        if (e.gamma !== null) {
+          const tilt = Math.max(-45, Math.min(45, e.gamma));
+          gravityX = (tilt / 45) * 1.3;
+        }
+      });
+
+      window.addEventListener('devicemotion', (e) => {
+        const acc = e.accelerationIncludingGravity || e.acceleration;
+        if (!acc) return;
+
+        const deltaX = (acc.x || 0) - lastAccX;
+        const deltaY = (acc.y || 0) - lastAccY;
+        lastAccX = acc.x || 0;
+        lastAccY = acc.y || 0;
+
+        if (Math.abs(deltaX) > 1.2 || Math.abs(deltaY) > 1.2) {
+          for (let i = 2; i < points.length; i++) {
+            points[i].oldX += deltaX * 1.5;
+            points[i].oldY += deltaY * 1.2;
+          }
+        }
+      });
+    }
+
+    // Touch & Swipe Handling
+    let isDragging = false;
+    let dragVelocityX = 0;
+    let lastTouchX = 0;
+
+    window.addEventListener('pointerdown', (e) => {
+      if (e.target.closest('#sidebar') || e.target.closest('.menu-trigger')) return;
+
+      isDragging = true;
+      lastTouchX = e.clientX;
+      const tip = points[points.length - 1];
+      tip.x = e.clientX;
+      tip.y = Math.max(e.clientY, 80);
+    });
+
+    window.addEventListener('pointermove', (e) => {
+      if (!isDragging) return;
+      dragVelocityX = e.clientX - lastTouchX;
+      lastTouchX = e.clientX;
+      const tip = points[points.length - 1];
+      tip.x = e.clientX;
+      tip.y = Math.max(e.clientY, 80);
+    });
+
+    window.addEventListener('pointerup', () => {
+      if (isDragging) {
+        isDragging = false;
+        const tip = points[points.length - 1];
+        tip.oldX = tip.x - dragVelocityX * 1.8;
+      }
+    });
+
+    function updatePhysics() {
+      points[0].x = window.innerWidth * hangPercentX;
+      points[0].y = 0;
+
+      for (let i = 1; i < points.length; i++) {
+        const p = points[i];
+        if (isDragging && i === points.length - 1) continue;
+
+        const vx = (p.x - p.oldX) * 0.985;
+        const vy = (p.y - p.oldY) * 0.985;
+
+        p.oldX = p.x;
+        p.oldY = p.y;
+
+        p.x += vx + gravityX;
+        p.y += vy + gravityY;
+      }
+
+      for (let iter = 0; iter < 5; iter++) {
+        for (let i = 0; i < points.length - 1; i++) {
+          const p1 = points[i];
+          const p2 = points[i + 1];
+
+          const dx = p2.x - p1.x;
+          const dy = p2.y - p1.y;
+          const dist = Math.hypot(dx, dy);
+          const diff = (dist - SEGMENT_LEN) / (dist || 1);
+
+          if (!p1.pinned) {
+            p1.x += dx * 0.5 * diff;
+            p1.y += dy * 0.5 * diff;
+          }
+          if (!(isDragging && i + 1 === points.length - 1)) {
+            p2.x -= dx * 0.5 * diff;
+            p2.y -= dy * 0.5 * diff;
+          }
+        }
+      }
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+
+      const shadowOffsetX = 16 * charmScale;
+      const shadowOffsetY = 20 * charmScale;
+      const shadowBlurAmt = 16;
+      const shadowColor = 'rgba(15, 23, 42, 0.28)';
+
+      // 1. Thread Shadow (கயிற்றின் ஆழமான நிழல்)
+      ctx.save();
+      ctx.beginPath();
+      ctx.moveTo(points[0].x + shadowOffsetX, points[0].y + shadowOffsetY);
+      for (let i = 1; i < points.length; i++) {
+        ctx.lineTo(points[i].x + shadowOffsetX, points[i].y + shadowOffsetY);
+      }
+      ctx.strokeStyle = 'rgba(0, 0, 0, 0.18)';
+      ctx.lineWidth = 3.5 * charmScale;
+      ctx.shadowColor = shadowColor;
+      ctx.shadowBlur = shadowBlurAmt;
+      ctx.stroke();
+      ctx.restore();
+
+      // 2. Real Thread (நிஜ கயிறு)
+      ctx.save();
+      ctx.beginPath();
+      ctx.moveTo(points[0].x, points[0].y);
+      for (let i = 1; i < points.length; i++) {
+        ctx.lineTo(points[i].x, points[i].y);
+      }
+      ctx.strokeStyle = '#78350f';
+      ctx.lineWidth = 2.8 * charmScale;
+      ctx.stroke();
+      ctx.restore();
+
+      // 3. Render Charms with Deep 3D Shadow
+      if (currentTheme === 'traditional') {
+        for (let i = 1; i < points.length - 1; i++) {
+          const p = points[i];
+          const prev = points[i - 1];
+          const ang = Math.atan2(p.y - prev.y, p.x - prev.x) - Math.PI / 2;
+
+          ctx.save();
+          ctx.translate(p.x, p.y);
+          ctx.rotate(ang);
+          ctx.shadowColor = shadowColor;
+          ctx.shadowBlur = 12;
+          ctx.shadowOffsetX = shadowOffsetX * 0.8;
+          ctx.shadowOffsetY = shadowOffsetY * 0.8;
+          ctx.font = `${28 * charmScale}px serif`;
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText('🌶️', 0, 0);
+          ctx.restore();
+        }
+
+        const last = points[points.length - 1];
+        const prev = points[points.length - 2];
+        const ang = Math.atan2(last.y - prev.y, last.x - prev.x) - Math.PI / 2;
+
+        ctx.save();
+        ctx.translate(last.x, last.y);
+        ctx.rotate(ang);
+        ctx.shadowColor = 'rgba(15, 23, 42, 0.35)';
+        ctx.shadowBlur = 20;
+        ctx.shadowOffsetX = shadowOffsetX;
+        ctx.shadowOffsetY = shadowOffsetY;
+        ctx.font = `${58 * charmScale}px serif`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'top';
+        ctx.fillText('🍋', 0, 0);
+        ctx.restore();
+
+      } else {
+        const emojis = { drishti: '👹', nazar: '🧿', bell: '🔔' };
+        const last = points[points.length - 1];
+        const prev = points[points.length - 2];
+        const ang = Math.atan2(last.y - prev.y, last.x - prev.x) - Math.PI / 2;
+
+        ctx.save();
+        ctx.translate(last.x, last.y);
+        ctx.rotate(ang);
+        ctx.shadowColor = 'rgba(15, 23, 42, 0.35)';
+        ctx.shadowBlur = 20;
+        ctx.shadowOffsetX = shadowOffsetX;
+        ctx.shadowOffsetY = shadowOffsetY;
+        ctx.font = `${62 * charmScale}px serif`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'top';
+        ctx.fillText(emojis[currentTheme] || '👹', 0, 0);
+        ctx.restore();
+      }
+
+      updatePhysics();
+      requestAnimationFrame(draw);
+    }
+
+    applyLanguageUI();
+    draw();
+  </script>
+</body>
+</html>
